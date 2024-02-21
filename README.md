@@ -10,3 +10,9 @@ Instrucciones
 - npm start
 
 - http://localhost:3000/
+
+Agregar un archivo .env
+
+MONGO_URI=mongodb+srv://marcelooliveto:{clave}@ecommerce.elxfcr6.mongodb.net/
+
+usar la que esta en el link de entrega
