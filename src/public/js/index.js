@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:3000')
+// const socket = io.connect('http://localhost:3000')
 const form = document.getElementById('addForm')
 const botonProds = document.getElementById('botonProductos')
 const removeform = document.getElementById('removeForm')
@@ -19,7 +19,6 @@ removeform.addEventListener('submit', async (e) => {
     await socket.emit('update-products');
     e.target.reset()
 })
-
 
 socket.on('products-data', (products) => {
     const tableBody = document.querySelector("#productsTable tbody");

@@ -7,7 +7,9 @@ import displayRoutes from 'express-routemap';
 import productsRoutes from './routes/products.routes.js';
 import cartsRoutes from './routes/carts.routes.js';
 
-import { mongoURI } from './config.js';
+//import { mongoURI } from './config.cjs';
+import pkg from './config.cjs';
+const { mongoURI } = pkg;
 import __dirname from "./utils.js";
 
 import { getProductById, getAllProducts, createProduct, deleteProduct } from './models/products.model.js';
@@ -36,6 +38,7 @@ httpServer.on('error', () => console.log(`Error: ${err}`));
 
 // Socket
 const io = new IO(httpServer);
+const messages = [];
 io.on('connection', socket => {
     console.log("Nuevo cliente conectado: ", socket.id);
 
@@ -53,7 +56,7 @@ io.on('connection', socket => {
         const products = await getAllProducts();
         socket.emit('products-data', products);
         socket.emit("status-changed", response);
-    })
+    });
 
     socket.on('remove-product', async (id) => {
         console.log(`inicio remove socket ${id}`)
@@ -62,12 +65,23 @@ io.on('connection', socket => {
         const products = await getAllProducts();
         socket.emit('products-data', products);
         console.log("fin remove socket")
-    })
+    });
+
+    socket.on("message", (data) => {
+        messages.unshift(data);
+        io.emit("messageLogs", messages);
+    });
+
+    socket.on("user-login", (usr) => {
+        socket.emit("messageLogs", messages)
+        socket.broadcast.emit("new-user", usr)
+    });
 });
 
 app.use("/static", express.static(__dirname + "/public"))
 app.use('/realtimeproducts', express.static(path.join(__dirname, '/public')))
 app.use('/home', express.static(path.join(__dirname, '/public')))
+app.use('/chat', express.static(path.join(__dirname, '/public')))
 
 // Handlebars
 import handlebars from "express-handlebars";
@@ -88,3 +102,13 @@ app.get("/home", async (req, res) => {
     const products = await getAllProducts()
     res.render("home", { ...products })
 })
+
+// app.get("/chat", async (req, res) => {
+//     res.render("chat", {})
+// })
+
+app.get('/chat', (req, res) => {
+    res.render('chat', {
+        layout: false,
+    });
+});
